@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using ProductsValidation.Models;
 using ProductsValidation.Services;
 
@@ -20,11 +18,37 @@ namespace ProductsValidation.Controllers
             myProducts = data.Products;
         }
         
-        public IActionResult Index(int filterId, string filtername)
+        [HttpGet]
+        public IActionResult Index()
         {
             return View(myProducts);
         }
-        
+
+        [HttpPost]
+        public IActionResult Index(ProductCatregoryPricesModel model)
+        {
+            ViewBag.CategoryType = model.CategoryType;
+            var products = new List<Product>();
+            if (!string.IsNullOrEmpty(model.CategoryType))
+            {
+                products = myProducts.Where(x => x.Type == model.Category).ToList();
+            }
+            else
+            {
+                foreach (var price in model.Prices)
+                {
+                    var product = myProducts.FirstOrDefault(x => x.Id == price.Key);
+                    if (product != null)
+                    {
+                        product.Price = price.Value;
+                        products.Add(product);
+                    }
+                }
+            }
+
+            return View("Index", products);
+        }
+
         public IActionResult View(int id)
         {
             Product prod = myProducts.Find(prod => prod.Id == id);
@@ -50,9 +74,8 @@ namespace ProductsValidation.Controllers
         public IActionResult Edit(Product product)
         {
             myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
-            return View(product);
+            return View("View", product);           
         }
-
         
         [HttpPost]
         public IActionResult Create(Product product)
@@ -69,7 +92,7 @@ namespace ProductsValidation.Controllers
         public IActionResult Delete(int id)
         {
             myProducts.Remove( myProducts.Find(product => product.Id == id));
-            return View("Index", myProducts);
+            return View("View", myProducts);
         }
 
         public IActionResult Error()
