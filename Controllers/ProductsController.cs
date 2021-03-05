@@ -73,15 +73,23 @@ namespace ProductsValidation.Controllers
         [HttpPost]
         public IActionResult Edit(Product product)
         {
-            myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
-            return View("View", product);           
+            if (ModelState.IsValid)
+            {
+                myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
+                return View("View", product);
+            }
+            return View();
         }
         
         [HttpPost]
         public IActionResult Create(Product product)
         {
-            myProducts.Add(product);
-            return View("View", product);
+            if (ModelState.IsValid)
+            {
+                myProducts.Add(product);
+                return View("View", product);
+            }
+            return View();
         }
 
         public IActionResult Create()
