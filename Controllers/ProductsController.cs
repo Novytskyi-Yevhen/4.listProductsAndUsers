@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using ProductsValidation.Models;
 using ProductsValidation.Services;
 
@@ -20,10 +18,37 @@ namespace ProductsValidation.Controllers
             myProducts = data.Products;
         }
         
-        public IActionResult Index(int filterId, string filtername)
+        [HttpGet]
+        public IActionResult Index()
         {
             return View(myProducts);
         }
+
+        [HttpPost]
+        public IActionResult Index(ProductCatregoryPricesModel model)
+        {
+            ViewBag.CategoryType = model.CategoryType;
+            var products = new List<Product>();
+            if (!string.IsNullOrEmpty(model.CategoryType))
+            {
+                products = myProducts.Where(x => x.Type == model.Category).ToList();
+            }
+            else
+            {
+                foreach (var price in model.Prices)
+                {
+                    var product = myProducts.FirstOrDefault(x => x.Id == price.Key);
+                    if (product != null)
+                    {
+                        product.Price = price.Value;
+                        products.Add(product);
+                    }
+                }
+            }
+
+            return View("Index", products);
+        }
+
         [Route("products/details/{id}")]
         public IActionResult View(int id)
         {
@@ -49,16 +74,23 @@ namespace ProductsValidation.Controllers
         [HttpPost]
         public IActionResult Edit(Product product)
         {
-            myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
-            return View(product);
+            if (ModelState.IsValid)
+            {
+                myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
+                return View("View", product);
+            }
+            return View();
         }
-
         
         [HttpPost]
         public IActionResult Create(Product product)
         {
-            myProducts.Add(product);
-            return View("View", product);
+            if (ModelState.IsValid)
+            {
+                myProducts.Add(product);
+                return View("View", product);
+            }
+            return View();
         }
 
         public IActionResult Create()
@@ -69,7 +101,7 @@ namespace ProductsValidation.Controllers
         public IActionResult Delete(int id)
         {
             myProducts.Remove( myProducts.Find(product => product.Id == id));
-            return View("Index", myProducts);
+            return View("View", myProducts);
         }
 
         public IActionResult Error()
