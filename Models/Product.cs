@@ -17,6 +17,7 @@ namespace ProductsValidation.Models
         public Category Type { get; set; }
         [Required]
         public string Name { get; set; }
+        [MinLength(2, ErrorMessage = "The value must contain more than 2 characters.")]       
         public string Description { get; set; }
         [Range(0.0, 100000.0)]
         [RegularExpression(@"^[0-9]+(\.[0-9]{1,2})$", ErrorMessage = "Valid format is: 999.99")]
