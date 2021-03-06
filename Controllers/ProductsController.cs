@@ -24,7 +24,7 @@ namespace ProductsValidation.Controllers
         {
             return View(myProducts);
         }
-        
+        [Route("products/details/{id}")]
         public IActionResult View(int id)
         {
             Product prod = myProducts.Find(prod => prod.Id == id);
